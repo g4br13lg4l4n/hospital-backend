@@ -2,6 +2,7 @@ const { response } = require('express');
 const Usuario = require('../models/usuario');
 const bcryptjs = require('bcryptjs');
 const { generarJWT } = require('../helpers/jwt');
+const { googleVerify } = require('../helpers/google-verify');
 
 const login = async (req, res = response) => {
     const { email, password } = req.body;
@@ -18,7 +19,7 @@ const login = async (req, res = response) => {
 
         const validPassword = bcryptjs.compareSync(password, userDB.password);
 
-        if(!validPassword) {
+        if (!validPassword) {
             return res.status(400).json({
                 ok: false,
                 msg: "Usuario o contraseña no valida"
@@ -40,7 +41,51 @@ const login = async (req, res = response) => {
     }
 }
 
+const googleSignIn = async (req, res = response) => {
+    try {
+        const { email, name, picture } = await googleVerify(req.body.token.credential);
+
+        const usuarioDB = await Usuario.findOne({ email });
+        let usuario;
+
+        if (!usuarioDB) {
+            usuario = new Usuario({
+                name,
+                email,
+                password: '123456',
+                img: picture,
+                google: true
+            });
+        } else {
+            usuario = usuarioDB;
+            usuario.google = true;
+        }
+        await usuario.save();
+
+        // Generar token
+        const token = await generarJWT(usuario.id);
+
+        res.json({
+            ok: true,
+            email, name, picture,
+            token
+        });
+
+
+    } catch (error) {
+        console.log('error --->', error);
+        res.status(400).json({
+            ok: false,
+            msg: 'Auth incorrecta'
+        });
+    }
+
+
+
+}
+
 module.exports = {
-    login
+    login,
+    googleSignIn
 }
 
