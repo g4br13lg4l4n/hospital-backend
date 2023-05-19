@@ -37,14 +37,12 @@ const crearMedico = async (req, res = response) => {
 const updateMedico = async (req, res = response) => {
     try {
         const id = req.params.id;
-        console.log(id)
         const medicoUpdated = await Medico.findByIdAndUpdate(id, { ...req.body }, { new: true });
         if (!medicoUpdated) {
             return responseJson(res, 500, false, 'No se encontró  médico a actualizar');
         }
         responseJson(res, 200, true, medicoUpdated);
     } catch (error) {
-        console.log(error)
         return responseJson(res, 500, false, 'Error en actualización');
     }
 }
