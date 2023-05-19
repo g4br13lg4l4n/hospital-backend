@@ -10,8 +10,8 @@ async function googleVerify(token) {
         //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
     });
     const payload = ticket.getPayload();
-    
-    return payload
+    const { email, name, picture } = payload;
+    return { email, name, picture };
 }
 
 module.exports = {

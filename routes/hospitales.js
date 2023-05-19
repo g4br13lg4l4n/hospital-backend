@@ -21,7 +21,11 @@ router.post('/',
 
 
 router.put('/:id',
-    [],
+    [
+        validateJWT,
+        check('name', 'Nombre de hospital obligatorio').notEmpty(),
+        validarCampos
+    ],
     updateHospital
 );
 
